@@ -1,0 +1,11 @@
+/home/rust/rCore-Tutorial-v3/os/target/riscv64gc-unknown-none-elf/debug/deps/libxmas_elf-491c6deb78b53861.rmeta: /home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/lib.rs /home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/header.rs /home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/sections.rs /home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/program.rs /home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/symbol_table.rs /home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/dynamic.rs /home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/hash.rs
+
+/home/rust/rCore-Tutorial-v3/os/target/riscv64gc-unknown-none-elf/debug/deps/xmas_elf-491c6deb78b53861.d: /home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/lib.rs /home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/header.rs /home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/sections.rs /home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/program.rs /home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/symbol_table.rs /home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/dynamic.rs /home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/hash.rs
+
+/home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/lib.rs:
+/home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/header.rs:
+/home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/sections.rs:
+/home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/program.rs:
+/home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/symbol_table.rs:
+/home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/dynamic.rs:
+/home/rust/.cargo/registry/src/mirrors.ustc.edu.cn-61ef6e0cd06fb9b8/xmas-elf-0.7.0/src/hash.rs:
