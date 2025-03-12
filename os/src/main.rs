@@ -20,9 +20,19 @@
 #![no_std]
 #![no_main]
 #![feature(panic_info_message)]
+#![feature(alloc_error_handler)]
 
 use core::arch::global_asm;
 use log::*;
+
+use mm::heap_allocator::heap_test;
+use mm::frame_allocator::frame_allocator_test;
+
+extern crate alloc;
+
+#[allow(unused)]
+#[macro_use]
+extern crate bitflags;
 
 #[path = "boards/qemu.rs"]
 mod board;
@@ -33,6 +43,7 @@ mod config;
 mod lang_items;
 mod loader;
 mod logging;
+mod mm;
 mod sbi;
 mod sync;
 pub mod syscall;
@@ -61,6 +72,12 @@ pub fn rust_main() -> ! {
     clear_bss();
     logging::init();
     info!("[kernel] Hello, world!");
+    mm::init();
+    info!("[kernel] back to world!");
+    heap_test();
+    info!("success to run heap_test");
+    frame_allocator_test();
+    info!("success to run frame_allocator_test");
     trap::init();
     loader::load_apps();
     trap::enable_timer_interrupt();
