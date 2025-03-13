@@ -1,7 +1,7 @@
 pub mod heap_allocator;
 pub mod frame_allocator;
 mod address;
-mod page_table;
+pub mod page_table;
 
 #[allow(unused)]
 pub use address::{PhysAddr, PhysPageNum, VirtAddr, VirtPageNum};

@@ -26,10 +26,11 @@ macro_rules! print {
     }
 }
 
-/// println string macro
 #[macro_export]
+/// println string macro
 macro_rules! println {
     ($fmt: literal $(, $($arg: tt)+)?) => {
         $crate::console::print(format_args!(concat!($fmt, "\n") $(, $($arg)+)?));
     }
 }
+

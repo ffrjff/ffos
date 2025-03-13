@@ -4,9 +4,8 @@ use core::fmt::{self, Debug, Formatter};
 
 const PA_WIDTH_SV39: usize =56;
 const PPN_WIDTH_SV39: usize = 44;
-
-
-
+const VPN_INDEX_MASK_SV39: usize = 0x1FF;
+const VPN_INDEX_SIZE_SV39: usize = 9;
 
 #[derive(Copy, Clone, Ord, PartialOrd, Eq, PartialEq)]
 /// struct of physical address
@@ -115,5 +114,41 @@ impl PhysPageNum {
     pub fn get_mut<T>(&self) -> &'static mut T {
         let pa: PhysAddr = (*self).into();
         unsafe { (pa.0 as *mut T).as_mut().unwrap() }
+    }
+
+    pub fn get_pte(&self, index: usize) -> &mut PageTableEntry {
+        let pa: PhysAddr = (*self).into();
+        let pte_slice= unsafe { 
+            core::slice::from_raw_parts_mut(pa.0 as *mut PageTableEntry, 512) 
+        };
+        &mut pte_slice[index]
+    }
+
+}
+
+impl VirtAddr {
+
+}
+
+impl VirtPageNum {
+    #[allow(unused)]
+    pub fn indexes(&self) -> [usize; 3] {
+        let mut vpn = self.0;
+        let mut idx = [0usize; 3];
+        for i in (0..3).rev() {
+            idx[i] = vpn & 511;
+            vpn >>= 9;
+        }
+        idx
+    }
+    ///
+    pub fn get_pt_indexes(&self) -> [usize; 3] {
+        let mut vpn = self.0;
+        let mut indexes = [0usize; 3];
+        for i in (0..3).rev() {
+            indexes[i] = VPN_INDEX_MASK_SV39 & vpn;
+            vpn >>= VPN_INDEX_SIZE_SV39;
+        }
+        indexes
     }
 }

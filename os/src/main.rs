@@ -27,6 +27,7 @@ use log::*;
 
 use mm::heap_allocator::heap_test;
 use mm::frame_allocator::frame_allocator_test;
+use mm::page_table::pagetable_test;
 
 extern crate alloc;
 
@@ -78,6 +79,8 @@ pub fn rust_main() -> ! {
     info!("success to run heap_test");
     frame_allocator_test();
     info!("success to run frame_allocator_test");
+    pagetable_test();
+    info!("success to run pagetable_test");
     trap::init();
     loader::load_apps();
     trap::enable_timer_interrupt();

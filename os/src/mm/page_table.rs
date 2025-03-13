@@ -1,6 +1,12 @@
+#[allow(unused)]
+use alloc::vec;
+#[allow(unused)]
+use alloc::vec::Vec;
 use bitflags::*;
-
-use super::address::PhysPageNum;
+use super::frame_allocator::frame_alloc;
+use super::VirtPageNum;
+#[allow(unused)]
+use super::{address::PhysPageNum, address::PhysAddr, FrameTracker};
 
 bitflags! {
     pub struct PTEFlags: u8 {
@@ -52,4 +58,99 @@ impl PageTableEntry {
     pub fn executable(&self) -> bool {
         self.flags().contains(PTEFlags::X)
     }
+    pub fn dirty(&self) -> bool {
+        self.flags().contains(PTEFlags::D)
+    }
+}
+
+/// struct of PageTable: only one member:satp(the basic addr of pt)
+pub struct PageTable {
+    satp: PhysPageNum,
+}
+impl PageTable {
+    pub fn new() -> Self {
+        let satp = frame_alloc().unwrap();
+        PageTable {
+            satp: satp.ppn,
+        }
+    }
+    pub fn trans_vpn_to_pte(&self, vpn: VirtPageNum) -> Option<PageTableEntry> {
+        self.find_pte(vpn).map(|pte| *pte)
+    }
+    #[allow(unused)]
+    pub fn trans_vpn_to_ppn(&self, vpn: VirtPageNum) -> Option<PhysPageNum> {
+        Some(self.find_pte(vpn).map(|pte| *pte).unwrap().ppn())
+    }
+
+    pub fn map(&mut self, vpn: VirtPageNum, ppn: PhysPageNum, flags: PTEFlags) {
+        let pte = self.find_or_create_pte(vpn).unwrap();
+        println!("vpn: {}, ppn: {}", vpn.0, ppn.0);
+        assert!(!pte.valid(), "vpn {:?} is mapped before mapping", vpn);
+        *pte = PageTableEntry::new(ppn, flags | PTEFlags::V);
+    }
+    #[allow(unused)]
+    pub fn unmap(&mut self, vpn: VirtPageNum) {
+        let pte = self.find_pte(vpn).unwrap();
+        assert!(pte.valid(), "vpn {:?} is invalid before unmapping", vpn);
+        *pte = PageTableEntry::empty();
+    }
+
+    pub fn find_or_create_pte(&mut self, vpn: VirtPageNum) -> Option<&mut PageTableEntry> {
+        let mut ppn = self.satp;
+        let indexes = vpn.get_pt_indexes();
+        for i in 0..3 {
+            let pte_slice= unsafe { 
+                core::slice::from_raw_parts_mut((PhysAddr::from(ppn)).0 as *mut PageTableEntry, 512) 
+            };
+            let pte = &mut pte_slice[indexes[i]];
+            if i == 2 {
+                return Some(pte);
+            }
+            if !pte.valid() {
+                println!("create a new pt with index {}",i);
+                let frame = frame_alloc().unwrap();
+                *pte = PageTableEntry::new(frame.ppn, PTEFlags::V);
+                println!("new pte: {}",pte.ppn().0);
+            }
+            ppn = pte.ppn();
+        }
+        None
+    }
+    pub fn find_pte(&self, vpn: VirtPageNum) -> Option<&mut PageTableEntry> {
+        let mut ppn = self.satp;
+        let indexes = vpn.get_pt_indexes();
+        for i in 0..3 {
+            let pte_slice= unsafe { 
+                core::slice::from_raw_parts_mut((PhysAddr::from(ppn)).0 as *mut PageTableEntry, 512) 
+            };
+            let pte = &mut pte_slice[indexes[i]];
+            if i == 2 {
+                return Some(pte);
+            }
+            if !pte.valid() {
+                return None;
+            }
+            ppn = pte.ppn();
+        }
+        None
+    }
+}
+
+
+#[allow(unused)]
+pub fn pagetable_test() {
+    println!("0");
+    let mut pagetable = PageTable::new();
+    println!("1");
+    let satp = pagetable.satp;
+    println!("2");
+    pagetable.map(VirtPageNum(2), satp, PTEFlags::V);
+    println!("3");
+    assert_eq!(pagetable.trans_vpn_to_pte(VirtPageNum(2)).unwrap().ppn(), satp);
+    assert_eq!(pagetable.trans_vpn_to_ppn(VirtPageNum(2)).unwrap(), PhysPageNum::from(satp));
+    match pagetable.find_pte(VirtPageNum(2)) {
+        Some(x) => {println!("pagetable_test passed!");}
+        None => {panic!("didn't find mapped virtual addr!");}
+    }
+    pagetable.map(VirtPageNum(3), satp, PTEFlags::V);
 }

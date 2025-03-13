@@ -54,14 +54,14 @@ impl FrameAlloctor {
     }
     pub fn alloc(&mut self) -> Option<PhysPageNum> {
         if let Some(ppn) = self.recycled.pop() {
-            // println!("alloc: current: {}, end: {}", self.current.0, self.end.0);
+            println!("pop alloc: current: {}, end: {};alloced: {}", self.current.0, self.end.0, ppn.0);
             Some(ppn)
         } else {
             if self.current == self.end {
                 None
             } else {
                 self.current.add();
-                // println!("alloc: current: {}, end: {}", self.current.0, self.end.0);
+                println!("add alloc: current: {}, end: {};alloced: {}", self.current.0, self.end.0, self.current.0-1);
                 Some((self.current.0 - 1).into())
             }
         }
@@ -76,6 +76,7 @@ impl FrameAlloctor {
                     // println!("dealloc: current: {}, end: {}", self.current.0, self.end.0);
                     panic!("PhysPageNum: {} has not been allocated!", ppn.0);
                 }
+        println!("dealloc: {}",ppn.0);
         self.recycled.push(ppn);
     }
 }
