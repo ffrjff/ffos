@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["PA_WIDTH_SV39","PPN_WIDTH_SV39","VPN_INDEX_MASK_SV39","VPN_INDEX_SIZE_SV39"],"struct":["PhysAddr","PhysPageNum","VirtAddr","VirtPageNum"]};

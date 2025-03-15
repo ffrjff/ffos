@@ -8,6 +8,7 @@ use core::fmt::{self, Debug, Formatter};
 /// manage a frame which has the same lifecycle as the tracker
 pub struct FrameTracker {
     pub ppn: PhysPageNum,
+    // pub page_state: PageState,
 }
 
 impl FrameTracker {

@@ -28,7 +28,8 @@ use log::*;
 use mm::heap_allocator::heap_test;
 use mm::frame_allocator::frame_allocator_test;
 use mm::page_table::pagetable_test;
-
+#[allow(unused)]
+use mm::address_space::remap_test;
 extern crate alloc;
 
 #[allow(unused)]
@@ -81,10 +82,14 @@ pub fn rust_main() -> ! {
     info!("success to run frame_allocator_test");
     pagetable_test();
     info!("success to run pagetable_test");
+    remap_test();
+    info!("success to run remap_test");
+    frame_allocator_test();
+    info!("frame_allocator_test pass");
     trap::init();
-    loader::load_apps();
+    //trap::enable_interrupt();
     trap::enable_timer_interrupt();
     timer::set_next_trigger();
-    task::run_first_task();
+    // task::run_first_task();
     panic!("Unreachable in rust_main!");
 }

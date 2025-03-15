@@ -1,0 +1,19 @@
+pub trait Region: Send + Sync {
+
+}
+
+pub struct LazyRegion {
+
+}
+pub struct SharedRegion {
+
+}
+pub struct FileRegion {
+
+}
+pub struct CowRegion {
+
+}
+pub struct DirectRegion {
+    
+}

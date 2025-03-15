@@ -1,4 +1,8 @@
 
 buddy system?
 
-write back?:flag:dirty
+write back?:flag:dirty(dealloc)
+
+fork:copy_page_table: copy on write
+
+pub fn from_file(); (in address_space)

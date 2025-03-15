@@ -64,14 +64,17 @@ impl PageTableEntry {
 }
 
 /// struct of PageTable: only one member:satp(the basic addr of pt)
+/// use: RA2 to equal lifetime
 pub struct PageTable {
     satp: PhysPageNum,
+    frames: Vec<FrameTracker>,
 }
 impl PageTable {
     pub fn new() -> Self {
         let satp = frame_alloc().unwrap();
         PageTable {
             satp: satp.ppn,
+            frames: vec![satp],
         }
     }
     pub fn trans_vpn_to_pte(&self, vpn: VirtPageNum) -> Option<PageTableEntry> {
@@ -84,7 +87,7 @@ impl PageTable {
 
     pub fn map(&mut self, vpn: VirtPageNum, ppn: PhysPageNum, flags: PTEFlags) {
         let pte = self.find_or_create_pte(vpn).unwrap();
-        println!("vpn: {}, ppn: {}", vpn.0, ppn.0);
+        // println!("vpn: {}, ppn: {}", vpn.0, ppn.0);
         assert!(!pte.valid(), "vpn {:?} is mapped before mapping", vpn);
         *pte = PageTableEntry::new(ppn, flags | PTEFlags::V);
     }
@@ -107,10 +110,11 @@ impl PageTable {
                 return Some(pte);
             }
             if !pte.valid() {
-                println!("create a new pt with index {}",i);
+                // println!("create a new pt with index {}",i);
                 let frame = frame_alloc().unwrap();
                 *pte = PageTableEntry::new(frame.ppn, PTEFlags::V);
-                println!("new pte: {}",pte.ppn().0);
+                self.frames.push(frame);
+                // println!("new pte: {}",pte.ppn().0);
             }
             ppn = pte.ppn();
         }
@@ -134,18 +138,17 @@ impl PageTable {
         }
         None
     }
+    pub fn set_satp_flag(&self) -> usize {
+        1usize << 63 | self.satp.0
+    }
 }
 
 
 #[allow(unused)]
 pub fn pagetable_test() {
-    println!("0");
-    let mut pagetable = PageTable::new();
-    println!("1");
+    let mut pagetable: PageTable = PageTable::new();
     let satp = pagetable.satp;
-    println!("2");
     pagetable.map(VirtPageNum(2), satp, PTEFlags::V);
-    println!("3");
     assert_eq!(pagetable.trans_vpn_to_pte(VirtPageNum(2)).unwrap().ppn(), satp);
     assert_eq!(pagetable.trans_vpn_to_ppn(VirtPageNum(2)).unwrap(), PhysPageNum::from(satp));
     match pagetable.find_pte(VirtPageNum(2)) {

@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"os":[["impl <a class=\"trait\" href=\"lazy_static/trait.LazyStatic.html\" title=\"trait lazy_static::LazyStatic\">LazyStatic</a> for <a class=\"struct\" href=\"os/mm/frame_allocator/struct.FRAME_ALLOCATOR.html\" title=\"struct os::mm::frame_allocator::FRAME_ALLOCATOR\">FRAME_ALLOCATOR</a>"],["impl <a class=\"trait\" href=\"lazy_static/trait.LazyStatic.html\" title=\"trait lazy_static::LazyStatic\">LazyStatic</a> for <a class=\"struct\" href=\"os/task/struct.TASK_MANAGER.html\" title=\"struct os::task::TASK_MANAGER\">TASK_MANAGER</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -1,0 +1,43 @@
+
+pub struct Header<'a> {
+    pub pt1: &'a HeaderPt1,
+    pub pt2: HeaderPt2<'a>,
+}
+
+pub struct HeaderPt1 {
+    pub magic: [u8; 4],
+    pub class: Class_,
+    pub data: Data_,
+    pub version: Version_,
+    pub os_abi: OsAbi_,
+    pub abi_version: u8,
+    pub padding: [u8; 7],
+}
+
+pub struct HeaderPt2_<P> {
+
+    pub type_: Type_,
+    pub machine: Machine_,
+    pub version: u32,
+    pub entry_point: P,
+    pub ph_offset: P,
+    pub sh_offset: P,
+    pub flags: u32,
+    pub header_size: u16,
+    pub ph_entry_size: u16,
+    pub ph_count: u16,
+    pub sh_entry_size: u16,
+    pub sh_count: u16,
+    pub sh_str_index: u16,
+}
+
+pub struct ProgramHeader64 {
+    pub type_: Type_,
+    pub flags: Flags,
+    pub offset: u64,
+    pub virtual_addr: u64,
+    pub physical_addr: u64,
+    pub file_size: u64,
+    pub mem_size: u64,
+    pub align: u64,
+}

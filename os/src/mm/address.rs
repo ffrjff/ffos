@@ -3,7 +3,9 @@ use crate::config::{PAGE_SIZE_BITS, PAGE_SIZE};
 use core::fmt::{self, Debug, Formatter};
 
 const PA_WIDTH_SV39: usize =56;
+const VA_WIDTH_SV39: usize = 39;
 const PPN_WIDTH_SV39: usize = 44;
+const VPN_WIDTH_SV39: usize = 27;
 const VPN_INDEX_MASK_SV39: usize = 0x1FF;
 const VPN_INDEX_SIZE_SV39: usize = 9;
 
@@ -81,6 +83,49 @@ impl From<PhysAddr> for PhysPageNum {
         value.floor()
     }
 }
+
+impl From<usize> for VirtAddr {
+    fn from(value: usize) -> Self { 
+        Self(value & ( (1 << VA_WIDTH_SV39) - 1 )) 
+    }
+}
+
+impl From<VirtAddr> for usize {
+    fn from(value: VirtAddr) -> Self {
+        if value.0 >= (1 << (VA_WIDTH_SV39 - 1)) {
+            value.0 | (!((1 << VA_WIDTH_SV39) - 1))
+        } else {
+            value.0
+        }
+    }
+}
+
+impl From<VirtPageNum> for VirtAddr {
+    fn from(value: VirtPageNum) -> Self { 
+         Self(value.0 << PAGE_SIZE_BITS)
+    }
+}
+
+impl From<usize> for VirtPageNum {
+    fn from(value: usize) -> Self { 
+        Self(value & ( (1 << VPN_WIDTH_SV39) - 1 )) 
+    }
+}
+impl From<VirtPageNum> for usize {
+    fn from(value: VirtPageNum) -> Self { 
+        value.0 
+    }
+}
+impl From<VirtAddr> for VirtPageNum {
+    fn from(value: VirtAddr) -> Self {
+        assert_eq!(value.page_offset(), 0);
+        value.floor()
+    }
+}
+
+
+
+
 impl PhysAddr {
     pub fn page_offset(&self) -> usize {
         self.0 & (PAGE_SIZE - 1)
@@ -127,6 +172,22 @@ impl PhysPageNum {
 }
 
 impl VirtAddr {
+    pub fn floor(&self) -> VirtPageNum {
+        VirtPageNum(self.0 / PAGE_SIZE)
+    }
+    pub fn ceil(&self) -> VirtPageNum {
+        if self.0 == 0 {
+            VirtPageNum(0)
+        } else {
+            VirtPageNum((self.0 - 1 + PAGE_SIZE) / PAGE_SIZE)
+        }
+    }
+    pub fn page_offset(&self) -> usize {
+        self.0 & (PAGE_SIZE - 1)
+    }
+    pub fn aligned(&self) -> bool {
+        self.page_offset() == 0
+    }
 
 }
 
@@ -150,5 +211,8 @@ impl VirtPageNum {
             vpn >>= VPN_INDEX_SIZE_SV39;
         }
         indexes
+    }
+    pub fn add(&mut self) {
+        self.0 += 1;
     }
 }
