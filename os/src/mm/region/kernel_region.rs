@@ -4,6 +4,7 @@ use super::{MemoryRegion, Permission, PageTable, PTEFlags};
 use super::{PhysAddr, PhysPageNum, VirtAddr, VirtPageNum};
 use crate::config::PAGE_SIZE;
 
+#[derive(Debug)]
 pub struct KernelRegion {
     start: VirtPageNum,
     end: VirtPageNum,
@@ -22,6 +23,12 @@ impl MemoryRegion for KernelRegion {
         for vpn in self.start.0..self.end.0 {
             page_table.unmap(vpn.into());
         }
+    }
+    fn get_start(&self) -> VirtPageNum {
+        self.start
+    }
+    fn get_end(&self) -> VirtPageNum {
+        self.end
     }
     fn copy_data(&mut self, page_table: &PageTable, data: &[u8]) {
         let mut start:usize = 0;
@@ -47,6 +54,21 @@ impl MemoryRegion for KernelRegion {
             }
             current_vpn.add();
         }
+    }
+    fn extend(&mut self, page_table: &mut PageTable, new_end: VirtPageNum) {
+        for num in self.end.0..new_end.0 {
+            let pte_flags = PTEFlags::from_bits(self.permission.bits()).unwrap();
+            page_table.map(num.into(), num.into(), pte_flags);
+        }
+        self.end = new_end;
+
+    }
+    fn shrink(&mut self, page_table: &mut PageTable, new_end: VirtPageNum) {
+        for num in self.end.0..new_end.0 {
+            page_table.unmap(num.into());
+        }
+        self.end = new_end;
+
     }
 }
 

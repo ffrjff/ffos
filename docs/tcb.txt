@@ -1,0 +1,60 @@
+
+new load: TaskControlBlock { 
+    task_status: Ready, 
+    task_context: TaskContext { 
+        return_address: 2149613752, 
+        sp: 18446744073709486080, 
+        callee_saved_register: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] 
+    }, 
+    address_space: AddressSpace { 
+        pid: 0, 
+        page_table: PageTable { 
+            satp: PPN:0x805ed, 
+            frames: [
+                FrameTracker: PPN=0x805ed, 
+                FrameTracker: PPN=0x805ee, 
+                FrameTracker: PPN=0x805ef, 
+                FrameTracker: PPN=0x805f1, 
+                FrameTracker: PPN=0x805f2] 
+        }, 
+        memory_regions: [
+            LazyRegion { 
+                start: VPN:0x10, 
+                end: VPN:0x11, 
+                pages: {VPN:0x10: Framed(FrameTracker: PPN=0x805f0)}, 
+                permission: R | X | U }, 
+            LazyRegion { 
+                start: VPN:0x11, 
+                end: VPN:0x12, 
+                pages: {VPN:0x11: Framed(FrameTracker: PPN=0x805f3)}, 
+                permission: R | U }, 
+            LazyRegion { 
+                start: VPN:0x12, 
+                end: VPN:0x13, 
+                pages: {VPN:0x12: Framed(FrameTracker: PPN=0x805f4)}, 
+                permission: R | W | U },
+            LazyRegion { 
+                start: VPN:0x14, 
+                end: VPN:0x16, 
+                pages: {
+                    VPN:0x14: Framed(FrameTracker: PPN=0x805f5), 
+                    VPN:0x15: Framed(FrameTracker: PPN=0x805f6)
+                }, 
+                permission: R | W | U }, 
+            LazyRegion { 
+                start: VPN:0x16, 
+                end: VPN:0x16, 
+                pages: {}, 
+                permission: R | W | U }, 
+            LazyRegion { 
+                start: VPN:0x7fffffe, 
+                end: VPN:0x7ffffff, 
+                pages: {VPN:0x7fffffe: Framed(FrameTracker: PPN=0x805f7)}, 
+                permission: R | W }], 
+        entry_point: 0 
+    }, 
+    trap_context_ppn: PPN:0x805f7, 
+    base_size: 90112, 
+    heap_bottom: 90112, 
+    program_break: 90112 
+}

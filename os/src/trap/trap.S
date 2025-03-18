@@ -5,48 +5,46 @@
 .macro LOAD_GP n
     ld x\n, \n*8(sp)
 .endm
-    .section .text
+    .section .text.trampoline
     .globl __alltraps
     .globl __restore
     .align 2
 __alltraps:
+    # 交换寄存器sp和寄存器sscratch的值，使sp指向内核栈顶
     csrrw sp, sscratch, sp
-    # now sp->kernel stack, sscratch->user stack
-    # allocate a TrapContext on kernel stack
-    addi sp, sp, -34*8
-    # save general-purpose registers
+    # 保存x1、x3、x5到x31
     sd x1, 1*8(sp)
-    # skip sp(x2), we will save it later
     sd x3, 3*8(sp)
-    # skip tp(x4), application does not use it
-    # save x5~x31
     .set n, 5
     .rept 27
         SAVE_GP %n
         .set n, n+1
     .endr
-    # we can use t0/t1/t2 freely, because they were saved on kernel stack
+    # 保存寄存器sstatus和sepc的值到堆栈
     csrr t0, sstatus
     csrr t1, sepc
     sd t0, 32*8(sp)
     sd t1, 33*8(sp)
-    # read user stack from sscratch and save it on the kernel stack
+    # 保存寄存器sscratch的值到堆栈
     csrr t2, sscratch
     sd t2, 2*8(sp)
-    # set input argument of trap_handler(cx: &mut TrapContext)
-    mv a0, sp
-    call trap_handler
+    # 加载新的satp、sepc、sp
+    ld t0, 34*8(sp)
+    ld t1, 36*8(sp)
+    ld sp, 35*8(sp)
+    csrw satp, t0
+    sfence.vma
+    jr t1
 
 __restore:
-    # now sp->kernel stack(after allocated), sscratch->user stack
-    # restore sstatus/sepc
+    csrw satp, a1
+    sfence.vma
+    csrw sscratch, a0
+    mv sp, a0
     ld t0, 32*8(sp)
     ld t1, 33*8(sp)
-    ld t2, 2*8(sp)
     csrw sstatus, t0
     csrw sepc, t1
-    csrw sscratch, t2
-    # restore general-purpuse registers except sp/tp
     ld x1, 1*8(sp)
     ld x3, 3*8(sp)
     .set n, 5
@@ -54,8 +52,5 @@ __restore:
         LOAD_GP %n
         .set n, n+1
     .endr
-    # release TrapContext on kernel stack
-    addi sp, sp, 34*8
-    # now sp->kernel stack, sscratch->user stack
-    csrrw sp, sscratch, sp
+    ld sp, 2*8(sp)
     sret

@@ -87,9 +87,12 @@ pub fn rust_main() -> ! {
     frame_allocator_test();
     info!("frame_allocator_test pass");
     trap::init();
-    //trap::enable_interrupt();
+    info!("init pass");
     trap::enable_timer_interrupt();
+    info!("enable_timer_interrupt pass");
     timer::set_next_trigger();
-    // task::run_first_task();
+    info!("set_next_trigger pass");
+    task::run_first_task();
+    info!("run_first_task pass");
     panic!("Unreachable in rust_main!");
 }

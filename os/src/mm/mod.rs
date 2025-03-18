@@ -4,6 +4,7 @@ pub mod address;
 pub mod page_table;
 pub mod address_space;
 pub mod region;
+use log::info;
 
 #[allow(unused)]
 pub use address::{PhysAddr, PhysPageNum, VirtAddr, VirtPageNum};
@@ -18,4 +19,5 @@ pub fn init() {
     heap_allocator::init_heap();
     frame_allocator::init_frame_allocator();
     KERNEL_SPACE.exclusive_access().apply_satp_and_flush_tlb();
+    info!("kernel_space inited successfully");
 }

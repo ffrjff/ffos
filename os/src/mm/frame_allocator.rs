@@ -8,7 +8,6 @@ use core::fmt::{self, Debug, Formatter};
 /// manage a frame which has the same lifecycle as the tracker
 pub struct FrameTracker {
     pub ppn: PhysPageNum,
-    // pub page_state: PageState,
 }
 
 impl FrameTracker {
@@ -109,7 +108,7 @@ pub fn frame_alloc() -> Option<FrameTracker> {
 }
 
 /// deallocate a frame
-fn frame_dealloc(ppn: PhysPageNum) {
+pub fn frame_dealloc(ppn: PhysPageNum) {
     FRAME_ALLOCATOR.exclusive_access().dealloc(ppn);
 }
 
