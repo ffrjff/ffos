@@ -9,6 +9,7 @@ use crate::mm::page_table::PTEFlags;
 #[allow(unused)]
 use crate::mm::frame_alloc;
 
+#[allow(unused)]
 pub fn sys_munmap(start: usize, len: usize) -> isize {
     if start % PAGE_SIZE != 0 {
         return -1;

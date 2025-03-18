@@ -1,0 +1,5 @@
+task.rs: pub fn new(elf_data: &[u8], app_id: usize) -> Self {
+    ..
+    KERNEL_SPACE.exclusive_access().insert_lazy_framed_area_to_kernel(
+        ..
+        这里不该调用lazy_region的方法，而是就用kernel的只不过要分配空间的insert

@@ -57,7 +57,7 @@ impl TaskControlBlock {
         };
         // prepare TrapContext in user space
         let trap_context = task_control_block.get_trap_context();
-        *trap_context = TrapContext::app_init_context(
+        *trap_context = TrapContext::init_task_context(
             entry_point,
             user_sp,
             KERNEL_SPACE.exclusive_access().token(),

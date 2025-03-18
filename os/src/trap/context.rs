@@ -22,7 +22,7 @@ impl TrapContext {
         self.x[2] = sp;
     }
     /// init app context
-    pub fn app_init_context(
+    pub fn init_task_context(
         entry: usize,
         sp: usize,
         kernel_satp: usize,
