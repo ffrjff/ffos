@@ -34,13 +34,13 @@ impl Drop for FrameTracker {
 }
 
 #[allow(unused)]
-pub struct FrameAlloctor {
+pub struct FrameAllocator {
     current: PhysPageNum,
     end: PhysPageNum,
     recycled: Vec<PhysPageNum>,
 }
 
-impl FrameAlloctor {
+impl FrameAllocator {
     pub fn new() -> Self {
         Self {
             current: PhysPageNum::from(0),
@@ -54,14 +54,14 @@ impl FrameAlloctor {
     }
     pub fn alloc(&mut self) -> Option<PhysPageNum> {
         if let Some(ppn) = self.recycled.pop() {
-            println!("pop alloc: current: {}, end: {};alloced: {}", self.current.0, self.end.0, ppn.0);
+            // println!("pop alloc: current: {}, end: {};alloced: {}", self.current.0, self.end.0, ppn.0);
             Some(ppn)
         } else {
             if self.current == self.end {
                 None
             } else {
                 self.current.add();
-                println!("add alloc: current: {}, end: {};alloced: {}", self.current.0, self.end.0, self.current.0-1);
+                // println!("add alloc: current: {}, end: {};alloced: {}", self.current.0, self.end.0, self.current.0-1);
                 Some((self.current.0 - 1).into())
             }
         }
@@ -76,15 +76,15 @@ impl FrameAlloctor {
                     // println!("dealloc: current: {}, end: {}", self.current.0, self.end.0);
                     panic!("PhysPageNum: {} has not been allocated!", ppn.0);
                 }
-        println!("dealloc: {}",ppn.0);
+        // println!("dealloc: {}",ppn.0);
         self.recycled.push(ppn);
     }
 }
 
 lazy_static! {
     /// frame allocator instance through lazy_static!
-    pub static ref FRAME_ALLOCATOR: UPSafeCell<FrameAlloctor> = unsafe {
-        UPSafeCell::new(FrameAlloctor::new())
+    pub static ref FRAME_ALLOCATOR: UPSafeCell<FrameAllocator> = unsafe {
+        UPSafeCell::new(FrameAllocator::new())
     };
 }
 

@@ -18,9 +18,3 @@ pub const CLOCK_FREQ: usize = 403000000 / 62;
 pub const CLOCK_FREQ: usize = 12500000;
 */
 pub use crate::board::{CLOCK_FREQ, MEMORY_END, MMIO};
-
-pub fn kernel_stack_position(app_id: usize) -> (usize, usize) {
-    let kernel_top = TRAMPOLINE - app_id * (KERNEL_STACK_SIZE + PAGE_SIZE);
-    let kernel_bottom = kernel_top - KERNEL_STACK_SIZE;
-    (kernel_bottom, kernel_top)
-}

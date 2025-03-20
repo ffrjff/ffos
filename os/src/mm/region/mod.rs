@@ -1,3 +1,6 @@
+use kernel_region::KernelRegion;
+use lazy_region::LazyRegion;
+
 #[allow(unused)]
 use crate::mm::page_table::{PageTable, PTEFlags};
 #[allow(unused)]
@@ -20,9 +23,14 @@ pub trait MemoryRegion: Send + Sync + fmt::Debug {
     fn shrink(&mut self, page_table: &mut PageTable, new_end: VirtPageNum);
     fn get_start(&self) -> VirtPageNum;
     fn get_end(&self) -> VirtPageNum;
+    fn is_kernel_region(&self) -> Option<&KernelRegion>;
+    fn is_lazy_region(&self) -> Option<&LazyRegion>;
+    // fn is_shared_region(&self) -> bool;
+    // fn is_file_region(&self) -> bool;
     // fn slipt();
     // pub fn fault_handler();
 }
+
 
 // pub trait ASRegion: Send + Sync {
 //     fn metadata(&self) -> &ASRegionMeta;

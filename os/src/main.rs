@@ -76,6 +76,7 @@ pub fn rust_main() -> ! {
     info!("[kernel] Hello, world!");
     mm::init();
     info!("[kernel] back to world!");
+    task::add_initproc();
     heap_test();
     info!("success to run heap_test");
     frame_allocator_test();
@@ -92,7 +93,9 @@ pub fn rust_main() -> ! {
     info!("enable_timer_interrupt pass");
     timer::set_next_trigger();
     info!("set_next_trigger pass");
-    task::run_first_task();
+    loader::list_apps();
+    info!("apps listed aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+    task::run_processes();
     info!("run_first_task pass");
     panic!("Unreachable in rust_main!");
 }

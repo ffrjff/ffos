@@ -1,6 +1,5 @@
 use crate::mm::address_space::KERNEL_SPACE;
 #[allow(unused)]
-use crate::task::TASK_MANAGER;
 use crate::config::PAGE_SIZE;
 #[allow(unused)]
 use crate::mm::address::{VirtAddr, PhysAddr, VirtPageNum, PhysPageNum};

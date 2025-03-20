@@ -4,6 +4,7 @@ pub mod address;
 pub mod page_table;
 pub mod address_space;
 pub mod region;
+pub mod kernel_space;
 use log::info;
 
 #[allow(unused)]

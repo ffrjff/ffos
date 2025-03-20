@@ -5,6 +5,8 @@ use crate::mm::frame_allocator::{frame_alloc, frame_dealloc};
 #[allow(unused)]
 use alloc::collections::BTreeMap;
 use alloc::sync::Arc;
+use super::KernelRegion;
+
 
 #[allow(unused)]
 use super::{MemoryRegion, PTEFlags, PageTable, Permission};
@@ -33,7 +35,7 @@ impl MemoryRegion for LazyRegion {
         for num in self.start.0..self.end.0 {
             let frame = frame_alloc().unwrap();
             let ppn = frame.ppn;
-            println!("vpn: {} is mapped to ppn: {}", num, ppn.0);
+            // println!("vpn: {} is mapped to ppn: {}", num, ppn.0);
             self.pages.insert(num.into(), PageState::Framed(frame));
             let pte_flags = PTEFlags::from_bits(self.permission.bits()).unwrap();
             page_table.map(num.into(), ppn, pte_flags);
@@ -86,7 +88,6 @@ impl MemoryRegion for LazyRegion {
             page_table.map(num.into(), ppn, pte_flags);
         }
         self.end = new_end;
-
     }
     fn shrink(&mut self, page_table: &mut PageTable, new_end: VirtPageNum) {
         for num in self.end.0..new_end.0 {
@@ -94,7 +95,12 @@ impl MemoryRegion for LazyRegion {
             page_table.unmap(num.into());
         }
         self.end = new_end;
-
+    }
+    fn is_kernel_region(&self) -> Option<&KernelRegion> {
+        None
+    }
+    fn is_lazy_region(&self) -> Option<&LazyRegion> {
+        Some(self)
     }
 }
 
@@ -109,7 +115,14 @@ impl LazyRegion {
             permission,
         }
     }
-    // pub fn
+    pub fn clone_region(region: &Self) -> Self {
+        Self {
+            start: region.get_start(),
+            end: region.get_end(),
+            pages: BTreeMap::new(),
+            permission: region.permission,
+        }
+    }
 }
 
 // pub fn lazy_alloc(stval: VirtAddr) {

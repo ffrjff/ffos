@@ -46,34 +46,12 @@ lazy_static! {
         Arc::new(unsafe { UPSafeCell::new(AddressSpace::new_kernel()) });
 }
 
-// /// manage address space
-// #[allow(unused)]
-// pub struct AddressSpace {
-//     pid: usize,
-//     pub page_table: PageTable,
-//     memory_regions: Vec<MemoryRegion>,
-//     entry_point: usize,
-//     // kernel_info: Option<KernelAddressSpaceInfo>,
-//     // trapcontext
-//     // trampoline
-// }
-
-// /// manage range and quick add_map from va to pa
-// #[allow(unused)]
-// pub struct MemoryRegion {
-//     range: Range<VirtPageNum>,
-//     pages: BTreeMap<VirtPageNum, Arc<FrameTracker>>,
-//     permission: Permission,
-//     // map_type: MapType,
-// }
 #[derive(Debug)]
 #[allow(unused)]
 pub struct AddressSpace {
-    pid: usize,
     pub page_table: PageTable,
     memory_regions: Vec<Box<dyn MemoryRegion>>,
     // region_map: BTreeMap<VirtPageNum, usize>,
-    entry_point: usize,
     // kernel_info: Option<KernelAddressSpaceInfo>,
 }
 
@@ -88,26 +66,11 @@ bitflags! {
     }
 }
 
-// pub struct MappedFile {
-//   fd: usize,
-//   start: usize,
-//   size: usize,
-//   offset: usize,
-//   permissions: MemoryPermissions,
-// }
-
-// pub struct KernelAddressSpaceInfo {
-//     metadata: usize,
-//     reserved: [usize; 2],
-// }
-
 impl AddressSpace {
     pub fn new() -> Self {
         let new = Self {
-            pid: 0,
             page_table: PageTable::new(),
             memory_regions: Vec::new(),
-            entry_point: 0,
         };
         log::debug!("[AddressSpace::new()]");
         new
@@ -124,7 +87,17 @@ impl AddressSpace {
         }
         self.memory_regions.push(region);
     }
-
+    pub fn region_delete_by_start(&mut self, start: VirtPageNum) {
+        if let Some((idx, area)) = self
+            .memory_regions
+            .iter_mut()
+            .enumerate()
+            .find(|(_, area)| area.get_start() == start)
+        {
+            area.unmap(&mut self.page_table);
+            self.memory_regions.remove(idx);
+        }
+    }
     pub fn map_trampoline(&mut self) {
         self.page_table.map(
             VirtAddr::from(TRAMPOLINE).into(),
@@ -207,10 +180,6 @@ impl AddressSpace {
     // pub fn region_refresh(&mut self, start: VirtPageNum, end: VirtPageNum, permission: Permission, region_type: RegionType) {}
     
     // /// create AddrSpace to kernel space
-    // pub fn new_kernel() -> Self {
-    //     let mut kernel_address_space = Self::new();
-    //     kernel_address_space.
-    // }
     // pub fn from_file();
 
 
@@ -286,6 +255,28 @@ impl AddressSpace {
         )
     }
 
+    pub fn from_existed_user(user_space: &Self) -> Self {
+        let mut address_space = Self:: new();
+        address_space.map_trampoline();
+        let mut new_region: LazyRegion;
+        for region in user_space.memory_regions.iter() {
+            if let Some(lazy_region) = region.is_lazy_region() {
+                new_region = LazyRegion::clone_region(lazy_region);
+                address_space.region_add(Box::new(new_region), None);
+                for num in region.get_start().0..region.get_end().0 {
+                    let src_ppn = user_space.translate(num.into()).unwrap().ppn();
+                    let dst_ppn = address_space.translate(num.into()).unwrap().ppn();
+                    dst_ppn
+                        .get_bytes_array()
+                        .copy_from_slice(src_ppn.get_bytes_array());
+                }
+            } else {
+                panic!("Region is not of type LazyRegion");
+            }
+        }
+        address_space
+    }
+
     pub fn apply_satp_and_flush_tlb(&self) {
         let satp = self.page_table.token();
         unsafe {
@@ -293,11 +284,15 @@ impl AddressSpace {
             asm!("sfence.vma");
         }
     }
+    pub fn recycle_data_pages(&mut self) {
+        //*self = Self::new_bare();
+        self.memory_regions.clear();
+    }
     pub fn insert_lazy_framed_area_to_kernel(
         &mut self,
         start_va: VirtAddr,
         end_va: VirtAddr,
-        permission: Permission,
+        permission: Permission
     ) {
         self.region_add(
             Box::new(LazyRegion::new(start_va, end_va, permission)),
@@ -332,100 +327,44 @@ impl AddressSpace {
     }
 }
 
-// impl MemoryRegion {
-//     pub fn new(start: VirtAddr, end: VirtAddr, permission: Permission) -> Self {
-//         let start_vpn: VirtPageNum = start.floor();
-//         let end_vpn: VirtPageNum = end.floor();
-//         Self {
-//             range: start_vpn..end_vpn,
-//             pages: BTreeMap::new(),
-//             permission,
-//         }
-//     }
-
-//     /// alloc physical region and add it to pagetable
-//     pub fn add_to_pt(&mut self, pagetable: &mut PageTable) {
-//         println!("START:{}, END:{}", self.range.start.0, self.range.end.0);
-//         for num in self.range.start.0..self.range.end.0 {
-//             let vpn = VirtPageNum(num);
-//             self.add_one(pagetable, vpn);
-//         }
-//     }
-//     /// dealloc 
-//     #[allow(unused)]
-//     pub fn delete_from_pt(&mut self, pagetable: &mut PageTable) {
-//         for num in self.range.start.0..self.range.end.0 {
-//             let vpn = VirtPageNum(num);
-//             self.delete_one(pagetable, vpn);
-//         } 
-//     }
-//     pub fn add_one(&mut self, page_table: &mut PageTable, vpn: VirtPageNum) {
-//         let frame = frame_alloc().unwrap();
-//         let ppn = frame.ppn;
-//         self.pages.insert(vpn, Arc::new(frame));
-//         // self.pages.insert(vpn, frame);
-//         page_table.map(vpn, ppn, PTEFlags::from_bits(self.permission.bits).unwrap());
-//     }
-//     pub fn delete_one(&mut self, page_table: &mut PageTable, vpn: VirtPageNum) {
-//         self.pages.remove(&vpn);
-//         page_table.unmap(vpn);
-//     }
-
-//     pub fn copy_data(&mut self, page_table: &PageTable, data: &[u8]) {
-//         let mut start:usize = 0;
-//         let mut current_vpn = self.range.start;
-//         let len = data.len();
-//         let mut over: bool = false;
-//         loop {
-//             let mut end = start + PAGE_SIZE;
-//             if end >= len {
-//                 end = len;
-//                 over = true;
-//             }
-//             let src = &data[start..end];
-//             let dst = &mut page_table
-//                 .trans_vpn_to_pte(current_vpn)
-//                 .unwrap()
-//                 .ppn()
-//                 .get_bytes_array()[..src.len()];
-//             dst.copy_from_slice(src);
-//             start += PAGE_SIZE;
-//             if over {
-//                 break;
-//             }
-//             current_vpn.add();
-//         }
-//     }
 
 
 
 
-    // pub fn copy_data(&mut self, page_table: &PageTable, data: &[u8]) {
-    //     let mut start: usize = 0;
-    //     let mut current_vpn = self.range.start;
-    //     let len = data.len();
-    //     loop {
-    //         let src = &data[start..len.min(start + PAGE_SIZE)];
-    //         let dst = &mut page_table
-    //             .translate(current_vpn)
-    //             .unwrap()
-    //             .ppn()
-    //             .get_bytes_array()[..src.len()];
-    //         dst.copy_from_slice(src);
-    //         start += PAGE_SIZE;
-    //         if start >= len {
-    //             break;
-    //         }
-    //         current_vpn.step();
-    //     }
-    // }
-// }
 
-// impl Debug for MemoryRegion {
-//     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        
-//     }
-// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #[allow(unused)]
 pub fn remap_test() {

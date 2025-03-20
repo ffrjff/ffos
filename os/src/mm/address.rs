@@ -127,6 +127,9 @@ impl From<VirtAddr> for VirtPageNum {
 
 
 impl PhysAddr {
+    pub fn get_mut<T>(&self) -> &'static mut T {
+        unsafe { (self.0 as *mut T).as_mut().unwrap() }
+    }
     pub fn page_offset(&self) -> usize {
         self.0 & (PAGE_SIZE - 1)
     }
