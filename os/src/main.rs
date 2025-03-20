@@ -94,7 +94,6 @@ pub fn rust_main() -> ! {
     timer::set_next_trigger();
     info!("set_next_trigger pass");
     loader::list_apps();
-    info!("apps listed aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
     task::run_processes();
     info!("run_first_task pass");
     panic!("Unreachable in rust_main!");

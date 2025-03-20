@@ -72,11 +72,12 @@ pub struct PageTable {
     satp: PhysPageNum,
     frames: Vec<FrameTracker>,
 }
+#[allow(unused)]
 use log::info;
 impl PageTable {
     pub fn new() -> Self {
         let satp = frame_alloc().unwrap();
-        info!("kernel satp: {:#x}",satp.ppn.0);
+        // info!("kernel satp: {:#x}",satp.ppn.0);
         PageTable {
             satp: satp.ppn,
             frames: vec![satp],
@@ -129,7 +130,7 @@ impl PageTable {
             if !pte.valid() {
                 // println!("create a new pt with index {}",i);
                 let frame = frame_alloc().unwrap();
-                log::info!("vpn: {:#x} is alloc", vpn.0);
+                // log::info!("vpn: {:#x} is alloc", vpn.0);
                 *pte = PageTableEntry::new(frame.ppn, PTEFlags::V);
                 self.frames.push(frame);
                 // println!("new pte: {}",pte.ppn().0);

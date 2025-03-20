@@ -46,7 +46,7 @@ pub use manager::add_process;
 pub use pid::{pid_alloc, PidAllocator};
 pub use processor::*;
 pub use processor::{
-    clone_current_process, get_current_trap_context, get_current_user_token, run_processes, schedule, take_current_process,
+    clone_current_process, get_current_trap_context, get_current_user_token, run_processes, schedule, take_out_of_current_process,
     Processor,
 };
 
@@ -65,23 +65,23 @@ lazy_static! {
 /// Suspend the current 'Running' task and run the next task in task list.
 pub fn suspend_current_process_and_run_next() {
     // There must be an application running.
-    let process = take_current_process().unwrap();
+    let current_process = take_out_of_current_process().unwrap();
 
     // ---- access current TCB exclusively
-    let mut process_inner = process.inner_exclusive_access();
-    let process_context_ptr = &mut process_inner.process_context as *mut TaskContext;
+    let mut current_process_inner = current_process.inner_exclusive_access();
+    let current_process_context_ptr = &mut current_process_inner.process_context as *mut TaskContext;
     // Change status to Ready
-    process_inner.process_status = ProcessStatus::Ready;
-    drop(process_inner);
-    add_process(process);
-    schedule(process_context_ptr);
+    current_process_inner.process_status = ProcessStatus::Ready;
+    drop(current_process_inner);
+    add_process(current_process);
+    schedule(current_process_context_ptr);
 }
 
 
 /// Exit the current 'Running' task and run the next task in task list.
 pub fn exit_current_process_and_run_next(exit_code: i32) {
     // take from Processor
-    let process = take_current_process().unwrap();
+    let process = take_out_of_current_process().unwrap();
     let pid = process.getpid();
     if pid == IDLE_PID {
         println!(

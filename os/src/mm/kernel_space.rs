@@ -36,18 +36,18 @@ impl KernelStack {
         KernelStack { pid }
     }
 
-    #[allow(unused)]
-    pub fn push_on_top<T>(&self, value: T) -> *mut T
-    where 
-        T: Sized,
-    {
-        let (_, kernel_stack_top) = kernel_stack_range(self.pid);
-        let top_ptr = (kernel_stack_top - core::mem::size_of::<T>()) as *mut T;
-        unsafe {
-            *top_ptr = value;
-        }
-        top_ptr
-    } 
+    // #[allow(unused)]
+    // pub fn push_on_top<T>(&self, value: T) -> *mut T
+    // where 
+    //     T: Sized,
+    // {
+    //     let (_, kernel_stack_top) = kernel_stack_range(self.pid);
+    //     let top_ptr = (kernel_stack_top - core::mem::size_of::<T>()) as *mut T;
+    //     unsafe {
+    //         *top_ptr = value;
+    //     }
+    //     top_ptr
+    // } 
     pub fn get_top(&self) -> usize {
         let (_, kernel_stack_top) = kernel_stack_range(self.pid);
         kernel_stack_top

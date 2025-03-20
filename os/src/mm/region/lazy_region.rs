@@ -31,7 +31,7 @@ pub enum PageState {
 
 impl MemoryRegion for LazyRegion {
     fn map(&mut self, page_table: &mut PageTable) {
-        println!("lazymap: START:{}, END:{}", self.start.0, self.end.0);
+        // println!("lazymap: START:{}, END:{}", self.start.0, self.end.0);
         for num in self.start.0..self.end.0 {
             let frame = frame_alloc().unwrap();
             let ppn = frame.ppn;
@@ -54,7 +54,7 @@ impl MemoryRegion for LazyRegion {
         self.end
     }
     fn copy_data(&mut self, page_table: &PageTable, data: &[u8]) {
-        println!("lazy copy_data");
+        // println!("lazy copy_data");
         let mut start: usize = 0;
         let mut current_vpn = self.start;
         let len = data.len();
@@ -122,6 +122,15 @@ impl LazyRegion {
             pages: BTreeMap::new(),
             permission: region.permission,
         }
+    }
+    pub fn is_vpn_in_region(&self, vpn: VirtPageNum) -> bool {
+        return (self.start.0 <= vpn.0) && (vpn.0 <= self.end.0)
+    }
+    pub fn map_one_cow_page(&self,) {
+
+    }
+    pub fn alloc_and_remap_cow_page() {
+
     }
 }
 

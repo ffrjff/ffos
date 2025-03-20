@@ -81,7 +81,7 @@ impl ProcessControlBlock {
         };
         // prepare TrapContext in user space
         let trap_context = process_control_block.inner_exclusive_access().get_trap_context();
-        *trap_context = TrapContext::init_task_context(
+        *trap_context = TrapContext::init_trap_context(
             entry_point,
             user_sp,
             KERNEL_SPACE.exclusive_access().token(),
@@ -107,8 +107,8 @@ impl ProcessControlBlock {
         // initialize base_size
         inner.base_size = user_sp;
         // initialize trap_cx
-        let trap_cx = inner.get_trap_context();
-        *trap_cx = TrapContext::init_task_context(
+        let trap_context = inner.get_trap_context();
+        *trap_context = TrapContext::init_trap_context(
             entry_point,
             user_sp,
             KERNEL_SPACE.exclusive_access().token(),
@@ -119,20 +119,17 @@ impl ProcessControlBlock {
     }
 
     pub fn fork(self: &Arc<Self>) -> Arc<Self> {
-        // ---- access parent PCB exclusively
         let mut parent_inner = self.inner_exclusive_access();
-        // copy user space(include trap context)
         let address_space = AddressSpace::from_existed_user(&parent_inner.address_space);
         let trap_context_ppn: PhysPageNum = address_space
             .translate(VirtAddr::from(TRAP_CONTEXT).into())
             .unwrap()
             .ppn();
-        // alloc a pid and a kernel stack in kernel space
-        let pid_handle = pid_alloc();
-        let kernel_stack = KernelStack::new(&pid_handle);
+        let pid_tracker = pid_alloc();
+        let kernel_stack = KernelStack::new(&pid_tracker);
         let kernel_stack_top = kernel_stack.get_top();
-        let task_control_block = Arc::new(ProcessControlBlock {
-            pid: Arc::new(pid_handle),
+        let process_control_block = Arc::new(ProcessControlBlock {
+            pid: Arc::new(pid_tracker),
             kernel_stack,
             inner: unsafe {
                 UPSafeCell::new(ProcessControlBlockInner {
@@ -148,13 +145,13 @@ impl ProcessControlBlock {
             },
         });
         // add child
-        parent_inner.children.push(task_control_block.clone());
+        parent_inner.children.push(process_control_block.clone());
         // modify kernel_sp in trap_cx
         // **** access children PCB exclusively
-        let trap_cx = task_control_block.inner_exclusive_access().get_trap_context();
-        trap_cx.kernel_sp = kernel_stack_top;
+        let trap_context = process_control_block.inner_exclusive_access().get_trap_context();
+        trap_context.kernel_sp = kernel_stack_top;
         // return
-        task_control_block
+        process_control_block
         // ---- release parent PCB automatically
         // **** release children PCB automatically
     }

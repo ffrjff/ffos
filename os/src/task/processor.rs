@@ -30,7 +30,7 @@ impl Processor {
         &mut self.idle_process_context as *mut _
     }
     /// used to create a new Processor
-    pub fn take_current_process(&mut self) -> Option<Arc<ProcessControlBlock>> {
+    pub fn take_out_of_current_process(&mut self) -> Option<Arc<ProcessControlBlock>> {
         self.current.take()
     }
     /// used to create a new Processor
@@ -59,8 +59,8 @@ pub fn run_processes() {
 }
 
 /// take out of current process and PROCESSOR current None
-pub fn take_current_process() -> Option<Arc<ProcessControlBlock>> {
-    PROCESSOR.exclusive_access().take_current_process()
+pub fn take_out_of_current_process() -> Option<Arc<ProcessControlBlock>> {
+    PROCESSOR.exclusive_access().take_out_of_current_process()
 }
 /// get current process
 pub fn clone_current_process() -> Option<Arc<ProcessControlBlock>> {

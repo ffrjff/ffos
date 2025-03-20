@@ -81,7 +81,7 @@ impl AddressSpace {
     /// add a region to current AddrSpace
     pub fn region_add(&mut self, mut region: Box<dyn MemoryRegion>, data: Option<&[u8]>) {
         region.map(&mut self.page_table);
-        println!("after map");
+        // println!("after map");
         if let Some(data) = data {
             region.copy_data(&self.page_table, data);
         }
@@ -192,10 +192,10 @@ impl AddressSpace {
         assert_eq!(elf_header.pt1.magic, [0x7f, 0x45, 0x4C, 0x46], "invalid elf file!");
         let ph_count = elf_header.pt2.ph_count();
         let mut max_end_vpn = VirtPageNum(0);
-        println!("entry: {}",elf.header.pt2.entry_point() as usize);
+        // println!("entry: {}",elf.header.pt2.entry_point() as usize);
         for i in 0..ph_count {
             let ph = elf.program_header(i).unwrap();
-            println!("ph_count: {}, LOAD? :{}", i, ph.get_type().unwrap() == xmas_elf::program::Type::Load );
+            // println!("ph_count: {}, LOAD? :{}", i, ph.get_type().unwrap() == xmas_elf::program::Type::Load );
             if ph.get_type().unwrap() == xmas_elf::program::Type::Load {
                 let start: VirtAddr= (ph.virtual_addr() as usize).into();
                 let end: VirtAddr = ((ph.virtual_addr() + ph.mem_size()) as usize).into();

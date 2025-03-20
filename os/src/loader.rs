@@ -12,7 +12,7 @@ pub fn get_num_app() -> usize {
 }
 /// get applications data
 pub fn get_app_data(app_id: usize) -> &'static [u8] {
-    println!("start to get app: {}", app_id);
+    // println!("start to get app: {}", app_id);
     extern "C" {
         fn _num_app();
     }

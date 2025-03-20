@@ -35,10 +35,10 @@ _app_names:
     .string "hello_world"
     .string "initproc"
     .string "matrix"
+    .string "shell"
     .string "sleep"
     .string "sleep_simple"
     .string "stack_overflow"
-    .string "user_shell"
     .string "usertests"
     .string "usertests-simple"
     .string "yield"
@@ -128,7 +128,7 @@ app_9_end:
     .global app_10_end
     .align 3
 app_10_start:
-    .incbin "../user/target/riscv64gc-unknown-none-elf/release/sleep"
+    .incbin "../user/target/riscv64gc-unknown-none-elf/release/shell"
 app_10_end:
 
     .section .data
@@ -136,7 +136,7 @@ app_10_end:
     .global app_11_end
     .align 3
 app_11_start:
-    .incbin "../user/target/riscv64gc-unknown-none-elf/release/sleep_simple"
+    .incbin "../user/target/riscv64gc-unknown-none-elf/release/sleep"
 app_11_end:
 
     .section .data
@@ -144,7 +144,7 @@ app_11_end:
     .global app_12_end
     .align 3
 app_12_start:
-    .incbin "../user/target/riscv64gc-unknown-none-elf/release/stack_overflow"
+    .incbin "../user/target/riscv64gc-unknown-none-elf/release/sleep_simple"
 app_12_end:
 
     .section .data
@@ -152,7 +152,7 @@ app_12_end:
     .global app_13_end
     .align 3
 app_13_start:
-    .incbin "../user/target/riscv64gc-unknown-none-elf/release/user_shell"
+    .incbin "../user/target/riscv64gc-unknown-none-elf/release/stack_overflow"
 app_13_end:
 
     .section .data
